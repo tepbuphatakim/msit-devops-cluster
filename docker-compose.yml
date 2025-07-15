@@ -40,3 +40,20 @@ services:
         failure_action: rollback
       restart_policy:
         condition: on-failure
+  haproxy:
+    image: haproxy:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - auth
+      - shop
+      - product
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        
