@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'TAG', defaultValue: 'latest', description: 'Tag (e.g. 1.0.0) for build and deploy')
+    }
+    
+    environment {
+        DOCKER_HUB_REPO = "015331741/msit-devops-cluster-auth"
+        DOCKER_CREDENTIALS_ID = 'dockerhub_token'
+        SERVICE_DIR = 'auth'
+        GITHUB_REPO = 'https://github.com/tepbuphatakim/msit-devops-cluster.git'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: "${SERVICE_DIR}/"]]]],
+                    userRemoteConfigs: [[url: "${GITHUB_REPO}"]]
+                ])
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    script {
+                        sh "docker build -t ${DOCKER_HUB_REPO}:${params.TAG} ."
+                    }
+                }
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([string(credentialsId: DOCKER_CREDENTIALS_ID, variable: 'DOCKER_TOKEN')]) {
+                    sh "echo \${DOCKER_TOKEN} | docker login -u ${DOCKER_HUB_REPO.split('/')[0]} --password-stdin"
+                }
+                sh "docker push ${DOCKER_HUB_REPO}:${params.TAG}"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker logout || true"
+            cleanWs()
+        }
+        success {
+            echo "Successfully built and pushed ${DOCKER_HUB_REPO}:${params.TAG}"
+        }
+        failure {
+            echo "Failed to build or push ${DOCKER_HUB_REPO}:${params.TAG}"
+        }
+    }
+}

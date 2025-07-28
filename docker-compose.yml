@@ -41,7 +41,7 @@ services:
       restart_policy:
         condition: on-failure
   haproxy:
-    image: haproxy:latest
+    image: haproxy:lts-bookworm
     ports:
       - 80:80
     volumes:
