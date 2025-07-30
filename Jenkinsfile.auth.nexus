@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'TAG', defaultValue: 'latest', description: 'Tag (e.g. 1.0.0) for build and deploy')
+    }
+    
+    environment {
+        SERVICE_DIR = 'auth'
+        GITHUB_REPO = 'https://github.com/tepbuphatakim/msit-devops-cluster.git'
+        NEXUS_URL = 'localhost:8082'
+        NEXUS_REPOSITORY = 'docker-hosted' // You will create this repository in Nexus
+        IMAGE_NAME = 'msit-devops-cluster-auth'
+        NEXUS_CREDENTIALS_ID = 'nexus-credentials' // You will create this in Jenkins
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: "${SERVICE_DIR}/"]]]],
+                    userRemoteConfigs: [[url: "${GITHUB_REPO}"]]
+                ])
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    script {
+                        sh "docker build -t ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG} ."
+                    }
+                }
+            }
+        }
+
+        stage('Push to Nexus Registry') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: NEXUS_CREDENTIALS_ID,
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASSWORD'
+                )]) {
+                    script {
+                        sh "echo \${NEXUS_PASSWORD} | docker login ${NEXUS_URL} -u \${NEXUS_USER} --password-stdin"
+                        
+                        sh "docker push ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker logout ${NEXUS_URL} || true"
+            cleanWs()
+        }
+        success {
+            echo "Successfully built and pushed ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG}"
+        }
+        failure {
+            echo "Failed to build or push ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG}"
+        }
+    }
+}
