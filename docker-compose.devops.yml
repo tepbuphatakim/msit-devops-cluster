@@ -19,10 +19,26 @@ services:
     networks:
       - jenkins-network
 
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081"  # Nexus web interface
+      - "8082:8082"  # Docker registry port
+    volumes:
+      - nexus-data:/nexus-data
+    environment:
+      - INSTALL4J_ADD_VM_PARAMS=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=512m
+    networks:
+      - jenkins-network
+
 networks:
   jenkins-network:
     driver: bridge
 
 volumes:
   jenkins_home:
+    driver: local
+  nexus-data:
     driver: local
