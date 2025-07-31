@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   auth:
-    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-auth:1.0.3
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-auth:1.0.8
     ports:
       - 5000:5000
     deploy:
@@ -15,7 +15,7 @@ services:
       restart_policy:
         condition: on-failure
   shop:
-    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-shop:latest
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-shop:1.0.1
     ports:
       - 4000:4000
     deploy:
@@ -28,7 +28,7 @@ services:
       restart_policy:
         condition: on-failure
   product:
-    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-product:latest
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-product:1.0.1
     ports:
       - 3000:3000
     deploy:
