@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return 'Auth service.'
+    return 'Auth service. v1.0.1'
 
 
 if __name__ == '__main__':
