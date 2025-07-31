@@ -1,1 +1,1 @@
-docker stack deploy -c docker-compose.yml msit-devops-cluster
+docker stack deploy -c docker-compose.app.nexus.yml --with-registry-auth msit-devops-cluster

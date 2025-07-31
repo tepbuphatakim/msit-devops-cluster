@@ -1,0 +1,60 @@
+version: "3.5"
+
+services:
+  auth:
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-auth:latest
+    ports:
+      - 5000:5000
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  shop:
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-shop:latest
+    ports:
+      - 4000:4000
+    deploy:
+      mode: replicated
+      replicas: 2
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  product:
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-product:latest
+    ports:
+      - 3000:3000
+    deploy:
+      mode: global
+      # replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  haproxy:
+    image: haproxy:lts-bookworm
+    ports:
+      - 80:80
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - auth
+      - shop
+      - product
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
