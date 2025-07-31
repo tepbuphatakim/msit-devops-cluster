@@ -4,7 +4,7 @@ const app = express();
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Product service.",
+    message: "Product service. v1.0.2",
   });
 });
 
