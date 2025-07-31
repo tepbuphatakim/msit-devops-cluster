@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   auth:
-    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-auth:1.0.5
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-auth:1.0.6
     ports:
       - 5000:5000
     deploy:
