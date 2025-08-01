@@ -5,7 +5,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return 'Auth service. v1.0.1'
+    import socket
+    return f'Auth service. v1.0.2 - Server IP: {socket.gethostbyname(socket.gethostname())}'
 
 
 if __name__ == '__main__':
