@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     import socket
-    return f'Auth service. v1.0.2 - Server IP: {socket.gethostbyname(socket.gethostname())}'
+    return f'Auth service. v1.0.3 - Public IP: {socket.gethostbyname("8.8.8.8")}'
 
 
 if __name__ == '__main__':
