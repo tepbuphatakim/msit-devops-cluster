@@ -10,7 +10,7 @@ func main() {
     r.GET("/", func(c *gin.Context) {
         c.JSON(200, gin.H{
             "success": true,
-            "message": "Shop service",
+            "message": "Shop service 1.0.3",
         })
     })
 

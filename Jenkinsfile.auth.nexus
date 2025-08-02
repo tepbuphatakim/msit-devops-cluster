@@ -16,6 +16,8 @@ pipeline {
         GITHUB_TOKEN_ID = 'github-token'
         EC2_PRIVATE_IP = '172.31.21.205'
         SSH_CREDENTIALS_ID = 'ec2-ssh-key'
+        TELEGRAM_BOT_TOKEN_ID = 'telegram-bot-token'
+        TELEGRAM_CHAT_ID = '-1002846438854'
     }
 
     stages {
@@ -109,9 +111,25 @@ pipeline {
         }
         success {
             echo "Successfully built and pushed ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG}"
+            withCredentials([string(credentialsId: TELEGRAM_BOT_TOKEN_ID, variable: 'BOT_TOKEN')]) {
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot\${BOT_TOKEN}/sendMessage \
+                    -d chat_id=${TELEGRAM_CHAT_ID} \
+                    -d text="✅ *SUCCESS*:\\nPipeline: ${IMAGE_NAME} with tag: ${params.TAG} was successful!" \
+                    -d parse_mode=Markdown
+                """
+            }
         }
         failure {
             echo "Failed to build or push ${NEXUS_URL}/${NEXUS_REPOSITORY}/${IMAGE_NAME}:${params.TAG}"
+            withCredentials([string(credentialsId: TELEGRAM_BOT_TOKEN_ID, variable: 'BOT_TOKEN')]) {
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot\${BOT_TOKEN}/sendMessage \
+                    -d chat_id=${TELEGRAM_CHAT_ID} \
+                    -d text="❌ *FAILED*:\\nPipeline: ${IMAGE_NAME} with tag: ${params.TAG} has failed." \
+                    -d parse_mode=Markdown
+                """
+            }
         }
     }
 }
