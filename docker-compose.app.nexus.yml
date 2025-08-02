@@ -15,7 +15,7 @@ services:
       restart_policy:
         condition: on-failure
   shop:
-    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-shop:1.0.1
+    image: 172.31.85.200:8082/docker-hosted/msit-devops-cluster-shop:1.0.2
     ports:
       - 4000:4000
     deploy:
